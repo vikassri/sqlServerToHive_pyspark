@@ -42,7 +42,6 @@ This will have secret configs and exported on runtime only.
 ```bash
 export user=root
 export password=hadoop
-export database=customer_my
 export hive_db=customer
 export target_path=/tmp/tables/mysql
 # format orc, parquet
