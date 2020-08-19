@@ -99,10 +99,10 @@ export mode=append
 Finally, Execute the script with wrapper
 ```bash
 # write the logs in console
-sh wrapper.sh dblist.list
+sh wrapper.sh dbfile.list
 
 # write the logs in nohup files
-nohup sh wrapper.sh dblist.list &
+nohup sh wrapper.sh dbfile.list &
 ```
 
 Once its completed successfully you can check the data in hive, database name will be keyspace and tables will be same named as cassandra tables.
