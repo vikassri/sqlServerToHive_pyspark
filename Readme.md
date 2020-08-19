@@ -3,6 +3,14 @@
 
 This project is to import the database with table and partitions from MS Sql using pyspark. Code is written in pyspark with mssql Spark Connector Jar. It will create hive tables in provided format(i.e parquet, orc etc)
 
+### REQUIREMENT
+* Import data from MS SQL to Hive 
+* Customise Source database Name and Hive Database
+* Insert Count Validation
+* Create table and Append data into table 
+* Load data in Dynamic and Static Partitions
+
+
 #### **Components:**
 
 * Config File
