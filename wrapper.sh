@@ -1,3 +1,3 @@
 source ./env_files/env.sh
-# spark-submit --jars spark-cassandra-connector.jar cassandraToHive.py <config> <keyspace>
-spark-submit --jars spark-cassandra-connector.jar cassandraToHive.py configs/config.ini test
+# spark-submit --jars mssql-jdbc-8.4.0.jre8.jar sqlServerToHive.py <config> <database>
+spark-submit --jars mssql-jdbc-8.4.0.jre8.jar sqlServerToHive.py configs/config.ini <database>
