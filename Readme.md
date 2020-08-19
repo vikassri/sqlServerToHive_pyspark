@@ -11,7 +11,7 @@ This project is to import the database with table and partitions from MS Sql usi
 * Load data in Dynamic and Static Partitions
 
 
-#### **Components:**
+### **Components:**
 
 * Config File
 * Environment file
@@ -36,7 +36,7 @@ partition=None
 ```
 
 
-##### Environment file
+#### Environment file
 This will have secret configs and exported on runtime only.
 ```bash
 export user=root
@@ -50,7 +50,7 @@ export format=parquet
 export mode=append
 ```
 
-##### Wrapper Script 
+#### Wrapper Script 
 we need to execute this script only
 ```bash
 source ./env_files/env.sh
