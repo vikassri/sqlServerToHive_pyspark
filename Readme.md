@@ -19,7 +19,7 @@ This project is to import the database with table and partitions from MS Sql usi
 * Wrapper Script
 
 
-##### ConfigFile
+#### ConfigFile
 Config file will have details regarding database/host and port etc
 ```bash
 [customer_mysql]
