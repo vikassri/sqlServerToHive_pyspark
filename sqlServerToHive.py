@@ -18,18 +18,18 @@ import sys
 
 def main():
     config_file = sys.argv[1].lower()
-#    section = sys.argv[2].lower()
+    section = sys.argv[2].lower()
     if config_file is None:
         sys.exit(1)
     else:
-        spark_load(config_file)
+        spark_load(config_file, section)
 
 
 def log(type, msg):
     print("{}:{}: {}".format(str(datetime.now()), type.upper(), msg))
 
 
-def spark_load(config_file):
+def spark_load(config_file,section):
     appName = "PySpark SqlServer query Load"
     master = "local"
     spark = SparkSession.builder.config("spark.sql.parquet.writeLegacyFormat", "true").appName(
@@ -37,7 +37,7 @@ def spark_load(config_file):
     config = configparser.ConfigParser()
     config.read(config_file)
     sections = config.sections()
-    database = section = os.environ['database']
+    database = section
     hive_db = os.environ['hive_db']
     server = config[section]['hostname']
     port = config[section]['port']
