@@ -69,10 +69,10 @@ def spark_load(config_file, section):
             log("info", "**** Running for Table {} ***".format(table))
             mssqlDF = spark.read.format("jdbc").option("url", "jdbc:sqlserver://" + server + ":" + port + ";databaseName=" + database).option("dbtable", table).option(
                 "user", user).option("password", password).option("driver", "com.microsoft.sqlserver.jdbc.SQLServerDriver").option("encoding", "ascii").load()
-            mssqlDF = mssqlDF.select(F.current_date().alias(
-                'offload_date'), '*', F.lit(database).alias('offload_database'))
             max_id = mssqlDF.agg({icol: "max"}).collect()[0][0]
             mssqlDF = mssqlDF[mssqlDF[icol] > max_id]
+            mssqlDF = mssqlDF.select(F.current_date().alias(
+                'offload_date'), '*', F.lit(database).alias('offload_database'))
             mssqlDF.printSchema()
             record_count = mssqlDF.count()
             log("info", "Query read completed and loaded into spark dataframe")
