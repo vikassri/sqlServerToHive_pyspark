@@ -29,7 +29,9 @@ def log(type, msg):
     print("{}:{}: {}".format(str(datetime.now()), type.upper(), msg))
 
 
-def spark_load(config_file,section):
+def spark_load(config_file, section):
+    success_file = '{}_success_{}.list'.format(str(current_date()), database)
+    s_file = open(success_file, 'a')
     appName = "PySpark SqlServer query Load"
     master = "local"
     spark = SparkSession.builder.config("spark.sql.parquet.writeLegacyFormat", "true").appName(
@@ -59,50 +61,56 @@ def spark_load(config_file,section):
     print("Output Format    : " + op_format)
     print("Mode of Output   : " + op_mode)
     print("Table List       : " + table_list)
+    print("Incr. Column     : " + icol)
     print("-----------------------------------------------------------------------------------------------------------------")
 
     for table in table_list.split(','):
-        log("info", "**** Running for Table {} ***".format(table))
-        mssqlDF = spark.read.format("jdbc").option("url", "jdbc:sqlserver://" + server + ":" + port + ";databaseName=" + database).option("dbtable", table).option(
-            "user", user).option("password", password).option("driver", "com.microsoft.sqlserver.jdbc.SQLServerDriver").option("encoding", "ascii").load()
-        mssqlDF = mssqlDF.select(F.current_date().alias(
-            'offload_date'), '*', F.lit(database).alias('offload_database'))
-        mssqlDF.show(5)
-        mssqlDF.printSchema()
-        record_count = mssqlDF.count()
-        log("info", "Query read completed and loaded into spark dataframe")
-        log("info", "Starting load to datalake target path")
-        log("info", "Record count is "+str(record_count))
-        log("info", "Checking if table already exists")
-        current_count = 0
-        if spark._jsparkSession.catalog().tableExists(hive_db, table):
-            log("info", "Table already exists")
-            log("Info", "Fetching the current count")
-            current_count = spark.sql(
+        if table not in open(success_file).read():
+            log("info", "**** Running for Table {} ***".format(table))
+            mssqlDF = spark.read.format("jdbc").option("url", "jdbc:sqlserver://" + server + ":" + port + ";databaseName=" + database).option("dbtable", table).option(
+                "user", user).option("password", password).option("driver", "com.microsoft.sqlserver.jdbc.SQLServerDriver").option("encoding", "ascii").load()
+            mssqlDF = mssqlDF.select(F.current_date().alias(
+                'offload_date'), '*', F.lit(database).alias('offload_database'))
+            max_id = mssqlDF.agg({icol: "max"}).collect()[0][0]
+            mssqlDF = mssqlDF[mssqlDF[icol] > max_id]
+            mssqlDF.printSchema()
+            record_count = mssqlDF.count()
+            log("info", "Query read completed and loaded into spark dataframe")
+            log("info", "Starting load to datalake target path")
+            log("info", "Record count is "+str(record_count))
+            log("info", "Checking if table already exists")
+            current_count = 0
+            if spark._jsparkSession.catalog().tableExists(hive_db, table):
+                log("info", "Table already exists")
+                log("Info", "Fetching the current count")
+                current_count = spark.sql(
+                    "select count(*) from {}.{}".format(hive_db, table)).collect()[0][0]
+                log("info", "Current count: {}".format(current_count))
+            else:
+                log("info", "Table doesn't exists|| Creating now")
+            try:
+                target_path = "{}/{}/{}".format(target_path, hive_db, table)
+                partition = "offload_database" if partition.lower() == "none" else partition
+                log("info", "partition : {}".format(str(partition)))
+                if op_format == "csv":
+                    log("warn", "you need to be create csv table for {} with path {}".format(
+                        table, target_path))
+                spark.sql("CREATE database IF NOT EXISTS {}".format(hive_db))
+                mssqlDF.write.saveAsTable(
+                    hive_db+"."+table, format=op_format, mode=op_mode,  partitionBy=partition, path=target_path)
+                s_file.write(table+"\n")
+            except:
+                log("error", "Loading failed, Running for next table !!")
+            log("info", "dataframe loaded in {} format successfully into target path {}".format(
+                op_format, target_path))
+            log("info", "Data copyied for table {} successfully".format(table))
+            updated_count = spark.sql(
                 "select count(*) from {}.{}".format(hive_db, table)).collect()[0][0]
-            log("info", "Current count: {}".format(current_count))
+            log("info", "Total record: {}, Source count: {} and Inserted Record: {}".format(
+                updated_count, record_count, updated_count-current_count))
         else:
-            log("info", "Table doesn't exists|| Creating now")
-        try:
-            target_path = "{}/{}/{}".format(target_path, hive_db, table)
-            partition = "offload_database" if partition.lower() == "none" else partition
-            log("info", "partition : {}".format(str(partition)))
-            if op_format == "csv":
-                log("warn", "you need to be create csv table for {} with path {}".format(
-                    table, target_path))
-            spark.sql("CREATE database IF NOT EXISTS {}".format(hive_db))
-            mssqlDF.write.saveAsTable(
-                hive_db+"."+table, format=op_format, mode=op_mode,  partitionBy=partition, path=target_path)
-        except:
-            log("error", "file format is not correct, please check !!")
-            sys.exit(100)
-        log("info", "dataframe loaded in {} format successfully into target path {}".format(
-            op_format, target_path))
-        log("info", "Data copyied for table {} successfully".format(table))
-        updated_count = spark.sql(
-            "select count(*) from {}.{}".format(hive_db, table)).collect()[0][0]
-        log("info", "Total record: {}, Source count: {} and Inserted Record: {}".format(
-            updated_count, record_count, updated_count-current_count))
+            log("info", "Skipping as Already completed load for table:{}".format(table))
+    success_file.close()
 
 
 if __name__ == '__main__':
