@@ -1,0 +1,10 @@
+{
+  "last_update_by": "Vikas Srivastava",
+  "last_update_date": "2020-08-23",
+  "hostname": "localhost",
+  "port": 3306,
+  "icol": "id",
+  "database": ["customer_mysql", "customer_my"],
+  "table_list": ["trips", "trips1"],
+  "partition": "None"
+}

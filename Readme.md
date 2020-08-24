@@ -14,7 +14,7 @@ This project is to import the database with table and partitions from MS Sql usi
 
 ### **Components:**
 
-* Config File
+* Config File (Json Format)
 * Environment file
 * Pyspark Code
 * Wrapper Script
@@ -22,18 +22,17 @@ This project is to import the database with table and partitions from MS Sql usi
 
 #### ConfigFile
 Config file will have details regarding database/host and port etc
-```bash
-[customer_mysql]
-hostname=localhost
-port=3306
-table_list=trips
-partition=None
-
-[customer_my]
-hostname=localhost
-port=3306
-table_list=trips
-partition=None
+```json
+{
+  "last_update_by": "Vikas Srivastava",
+  "last_update_date": "2020-08-23",
+  "hostname": "localhost",
+  "port": 3306,
+  "icol": "id",
+  "database": ["customer_mysql", "customer_my"],
+  "table_list": ["trips", "trips1"],
+  "partition": "None"
+}
 ```
 
 
