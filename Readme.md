@@ -5,7 +5,7 @@
 This project is to import the database with table and partitions from MS Sql using pyspark. Code is written in pyspark with mssql Spark Connector Jar. It will create hive tables in provided format(i.e parquet, orc etc)
 
 ### REQUIREMENT
-* Import data from MS SQL to Hive 
+* Import database with same tables from MS SQL to Hive 
 * Customise Source database Name and Hive Database
 * Insert Count Validation
 * Create table and Append data into table 
@@ -67,18 +67,17 @@ cd sqlServerToHive_pyspark
 
 **update the config files**
 
-```bash
-[<source db 1>]
-hostname=<hostname>
-port=<port>
-table_list=<table1>
-partition=None
-
-[<source db 2>]
-hostname=<hostname>
-port=<port>
-table_list=<table1>
-partition=None
+```json
+{
+  "last_update_by": "Vikas Srivastava",
+  "last_update_date": "2020-08-23",
+  "hostname": "localhost",
+  "port": 3306,
+  "icol": "id",
+  "database": ["customer_mysql", "customer_my"],
+  "table_list": ["trips", "trips1"],
+  "partition": "None"
+}
 ```
 
 **Update the Environment file**
